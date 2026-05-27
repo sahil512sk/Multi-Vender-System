@@ -1,9 +1,6 @@
 const jwt = require('jsonwebtoken');
-
 const User = require('../models/User');
 
-
-// Generate JWT Token
 const generateToken = (user) => {
 
     return jwt.sign(
@@ -15,51 +12,35 @@ const generateToken = (user) => {
     );
 };
 
-
-
-// REGISTER
 const register = async (req, res) => {
 
     try {
-
-        const { name, email, password, role } = req.body;
-
-
-        // Check existing user
-        const existingUser = await User.findOne({ email });
+        const { name, email, password, role, mobile } = req.body;
+        const existingUser = await User.findOne({ email }) || User.findOne({ mobile });
 
         if (existingUser) {
-
             return res.status(400).json({
-                message: 'Email already exists'
+                message: 'Email or mobile number already exists'
             });
         }
 
-
-        // Create user
         const user = await User.create({
             name,
             email,
             password,
+            mobile,
             role
         });
-
-
-        // Generate token
         const token = generateToken(user);
 
-
-        // Response without password
         res.status(201).json({
-
             message: 'User registered successfully',
-
             token,
-
             user: {
                 id: user._id,
                 name: user.name,
                 email: user.email,
+                mobile: user.mobile,
                 role: user.role,
                 isActive: user.isActive,
                 createdAt: user.createdAt
@@ -74,28 +55,17 @@ const register = async (req, res) => {
     }
 };
 
-
-
-// LOGIN
 const login = async (req, res) => {
 
     try {
-
         const { email, password } = req.body;
-
-
-        // Find user
         const user = await User.findOne({ email });
 
         if (!user) {
-
             return res.status(401).json({
                 message: 'Invalid email or password'
             });
         }
-
-
-        // Compare password
         const isMatch = await user.comparePassword(password);
 
         if (!isMatch) {
@@ -104,22 +74,16 @@ const login = async (req, res) => {
                 message: 'Invalid email or password'
             });
         }
-
-
-        // Generate token
         const token = generateToken(user);
 
-
         res.status(200).json({
-
             message: 'Login successful',
-
             token,
-
             user: {
                 id: user._id,
                 name: user.name,
                 email: user.email,
+                mobile: user.mobile,
                 role: user.role,
                 isActive: user.isActive
             }
@@ -133,28 +97,20 @@ const login = async (req, res) => {
     }
 };
 
-
-
-// GET ME
 const getMe = async (req, res) => {
 
     try {
-
         const user = await User
             .findById(req.user.id)
             .select('-password');
 
-
         if (!user) {
-
             return res.status(404).json({
                 message: 'User not found'
             });
         }
 
-
         res.status(200).json(user);
-
     } catch (error) {
 
         res.status(500).json({
@@ -162,7 +118,6 @@ const getMe = async (req, res) => {
         });
     }
 };
-
 
 module.exports = {
     register,

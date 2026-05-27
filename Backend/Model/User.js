@@ -23,6 +23,13 @@ const userSchema = new mongoose.Schema({
         enum: ['buyer', 'vendor', 'admin'],
         default: 'buyer',
     },
+    mobile: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true,
+        match: /^[0-9]{10}$/
+    },
     isActive: {
         type: Boolean,
         default: true,
