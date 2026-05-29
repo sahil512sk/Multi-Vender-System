@@ -1,36 +1,57 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require('../Model/User.js');
 
 const generateToken = (user) => {
 
     return jwt.sign(
         {
             id: user._id,
-            email: user.email,
             role: user.role
+        },
+        process.env.JWT_SECRET,
+        {
+            expiresIn: process.env.JWT_EXPIRE || '7d'
         }
     );
 };
 
 const register = async (req, res) => {
-
     try {
         const { name, email, password, role, mobile } = req.body;
-        const existingUser = await User.findOne({ email }) || User.findOne({ mobile });
 
-        if (existingUser) {
+        if (!name) {
+            return res.status(400).json({ message: 'Name is required' });
+        }
+        if (!password) {
+            return res.status(400).json({ message: 'Password is required' });
+        }
+        if (!email && !mobile) {
             return res.status(400).json({
-                message: 'Email or mobile number already exists'
+                message: 'Please provide email or mobile number'
             });
         }
 
-        const user = await User.create({
-            name,
-            email,
-            password,
-            mobile,
-            role
-        });
+        const query = [];
+        if (email)  query.push({ email });
+        if (mobile) query.push({ mobile });
+
+        const existingUser = await User.findOne({ $or: query });
+
+        if (existingUser) {
+            if (email && existingUser.email === email) {
+                return res.status(400).json({ message: 'Email already exists' });
+            }
+            if (mobile && existingUser.mobile === mobile) {
+                return res.status(400).json({ message: 'Mobile number already exists' });
+            }
+        }
+
+        const userData = { name, password };
+        if (email)  userData.email  = email;
+        if (mobile) userData.mobile = mobile;
+        if (role)   userData.role   = role;
+
+        const user = await User.create(userData);
         const token = generateToken(user);
 
         res.status(201).json({
@@ -48,32 +69,51 @@ const register = async (req, res) => {
         });
 
     } catch (error) {
-
-        res.status(500).json({
-            message: error.message
-        });
+        res.status(500).json({ message: error.message });
     }
 };
 
 const login = async (req, res) => {
-
     try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
+        const { mobile, email, password } = req.body;
+
+        if (!mobile && !email) {
+            return res.status(400).json({
+                message: 'Please provide email or mobile number'
+            });
+        }
+
+        if (!password) {
+            return res.status(400).json({
+                message: 'Please provide password'
+            });
+        }
+
+        const query = [];
+        if (email)  query.push({ email });
+        if (mobile) query.push({ mobile });
+
+        const user = await User.findOne({ $or: query });
 
         if (!user) {
             return res.status(401).json({
-                message: 'Invalid email or password'
+                message: 'Invalid credentials'
             });
         }
+
+        if (!user.isActive) {
+            return res.status(403).json({
+                message: 'Account is deactivated'
+            });
+        }
+
         const isMatch = await user.comparePassword(password);
-
         if (!isMatch) {
-
             return res.status(401).json({
-                message: 'Invalid email or password'
+                message: 'Invalid credentials'
             });
         }
+
         const token = generateToken(user);
 
         res.status(200).json({
@@ -90,7 +130,6 @@ const login = async (req, res) => {
         });
 
     } catch (error) {
-
         res.status(500).json({
             message: error.message
         });
@@ -109,7 +148,6 @@ const getMe = async (req, res) => {
                 message: 'User not found'
             });
         }
-
         res.status(200).json(user);
     } catch (error) {
 
@@ -124,3 +162,16 @@ module.exports = {
     login,
     getMe
 };
+
+// .env
+// Username                 =   "sahil512sk_db_user"
+// database                 =   "MVS"
+// password                 =   "rdx_tbijm_049"
+// mongo_uri                =   "mongodb+srv://sahil512sk_db_user:rdx_tbijm_049@mvs.h8suti5.mongodb.net/?appName=MVS"
+// JWT_SECRET               =   "your_jwt_secret_key"
+// JWT_EXPIRE               =   "7d"
+// TWILIO_ACCOUNT_SID       =   your_sid
+// TWILIO_AUTH_TOKEN        =   your_token
+// TWILIO_PHONE             =   +1xxxxxxxxxx
+// EMAIL_USER               =   your@gmail.com
+// EMAIL_PASS               =   your_app_password
