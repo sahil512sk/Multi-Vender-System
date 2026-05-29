@@ -1,5 +1,6 @@
-const jwt = require('jsonwebtoken');
-const User = require('../Model/User.js');
+import jwt from 'jsonwebtoken';
+import User from '../Model/User.js';
+import otp from '../utils/sendOtp.js';
 
 const generateToken = (user) => {
 
@@ -157,11 +158,7 @@ const getMe = async (req, res) => {
     }
 };
 
-module.exports = {
-    register,
-    login,
-    getMe
-};
+export { register, login, getMe };
 
 // .env
 // Username                 =   "sahil512sk_db_user"

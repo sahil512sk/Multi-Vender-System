@@ -1,4 +1,4 @@
-const { MongoClient } = require('mongodb');
+import { MongoClient } from 'mongodb';
 const client = new MongoClient(process.env.mongo_uri);
 
 async function connectDB() {
@@ -7,4 +7,5 @@ async function connectDB() {
 
     return client.db('test');
 }
-module.exports = connectDB;
+
+export default connectDB;

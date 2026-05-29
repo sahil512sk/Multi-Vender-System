@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema({
         trim: true,
         match: /^[0-9]{10}$/
     },
+    otp: {
+        code: { type: String },
+        expiresAt: { type: Date },
+    },
     isActive: {
         type: Boolean,
         default: true,
@@ -50,4 +54,4 @@ userSchema.methods.comparePassword = async function (userPassword) {
     return await bcrypt.compare(userPassword, this.password);
 }
 
-module.exports = mongoose.model('User', userSchema);
+export default mongoose.model('User', userSchema);

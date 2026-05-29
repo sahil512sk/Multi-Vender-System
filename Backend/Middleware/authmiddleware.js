@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
-const User = require('../Model/User.js');
+import jwt from 'jsonwebtoken';
+import User from '../Model/User.js';
 
 const protect = async (req, res, next) => {
     try {
