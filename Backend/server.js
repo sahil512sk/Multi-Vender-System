@@ -9,4 +9,4 @@ app.get('/', (req, res) => {
     res.send('kida fer');
 });
 
-module.exports = app;
+export default app;

@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../Model/User.js';
-import otp from '../utils/sendOtp.js';
+import { generateOtp, sendEmailOtp, sendSmsOtp } from '../utils/sendOtp.js';
 
 const generateToken = (user) => {
 
