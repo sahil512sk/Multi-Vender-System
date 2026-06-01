@@ -1,4 +1,4 @@
-import { useAuth } from '../src/context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const roleColor = { buyer: '#2563eb', vendor: '#7c3aed', admin: '#dc2626' };

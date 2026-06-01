@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../src/context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 const isEmail  = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 const isMobile = v => /^[0-9]{10}$/.test(v);
