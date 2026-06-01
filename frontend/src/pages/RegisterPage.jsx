@@ -56,7 +56,7 @@ const RegisterPage = () => {
             <div className="auth-card">
                 <div className="auth-header">
                     <h1>Create account</h1>
-                    <p>Join KOMA today</p>
+                    <p>Join vifKart today</p>
                 </div>
 
                 <form onSubmit={handleSubmit} noValidate>
@@ -77,7 +77,7 @@ const RegisterPage = () => {
                             {errors.email && <span className="field-err">{errors.email}</span>}
                         </div>
                         <div className="field">
-                            <label htmlFor="mobile">Mobile <span className="optional">optional</span></label>
+                            <label htmlFor="mobile">Mobile <span className="required">*</span></label>
                             <input id="mobile" type="tel" placeholder="10 digits" maxLength={10}
                                 value={form.mobile} onChange={e => set('mobile', e.target.value)}
                                 autoComplete="tel" />

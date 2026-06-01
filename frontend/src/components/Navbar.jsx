@@ -14,7 +14,7 @@ const Navbar = () => {
 
     return (
         <nav className="navbar">
-            <Link to="/" className="navbar-brand">KOMA</Link>
+            <Link to="/" className="navbar-brand">vifKart</Link>
             <div className="navbar-right">
                 {user ? (
                     <>

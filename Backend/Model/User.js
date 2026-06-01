@@ -25,7 +25,6 @@ const userSchema = new mongoose.Schema({
     },
     mobile: {
         type: String,
-        unique: true,
         sparse: true,
         trim: true,
         match: /^[0-9]{10}$/
