@@ -13,7 +13,9 @@ const request = async (endpoint, options = {}) => {
 };
 
 export const authApi = {
-    register: (payload) => request('/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
-    login:    (payload) => request('/auth/login',    { method: 'POST', body: JSON.stringify(payload) }),
-    getMe:    ()        => request('/auth/me'),
+    register:  (payload) => request('/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
+    login:     (payload) => request('/auth/login',    { method: 'POST', body: JSON.stringify(payload) }),
+    verifyOtp: (payload) => request('/auth/verify-otp', { method: 'POST', body: JSON.stringify(payload) }),
+    resendOtp: (payload) => request('/auth/resend-otp', { method: 'POST', body: JSON.stringify(payload) }),
+    getMe:     ()        => request('/auth/me'),
 };
