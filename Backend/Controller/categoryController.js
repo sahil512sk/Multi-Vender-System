@@ -16,9 +16,9 @@ const createCategory = async (req, res) => {
     }
 }
 
-const getCategories = async (req, res) => {
+const fetchCategories = async (req, res) => {
     try {
-        const categories = await category.find();
+        const categories = await Category.find();
         res.status(200).json({
             success: true,
             data: categories
@@ -31,4 +31,4 @@ const getCategories = async (req, res) => {
         })
     }
 }
-export { createCategory, getCategories };
+export { createCategory, fetchCategories };

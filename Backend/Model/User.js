@@ -1,11 +1,11 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcrypt';
+import bcrypt   from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
     name: {
-        type: String,
+        type:     String,
         required: true,
-        trim: true,
+        trim:     true,
     },
     email: {
         type: String,
@@ -14,43 +14,43 @@ const userSchema = new mongoose.Schema({
         trim: true,
         lowercase: true,
     },
+    mobile: {
+        type:   String,
+        sparse: true,
+        unique: true,
+        trim:   true,
+        match:  [/^[0-9]{10}$/, 'Mobile must be a 10-digit number'],
+    },
     password: {
-        type: String,
+        type:     String,
         required: true,
     },
     role: {
-        type: String,
-        enum: ['buyer', 'vendor', 'admin'],
+        type:    String,
+        enum:    ['buyer', 'vendor', 'admin'],
         default: 'buyer',
     },
-    mobile: {
-        type: String,
-        sparse: true,
-        trim: true,
-        match: /^[0-9]{10}$/
-    },
+    isVerified: { type: Boolean, default: false },
+    isActive:   { type: Boolean, default: true  },
     otp: {
-        code: { type: String },
-        expiresAt: { type: Date },
+        code:      { type: String, default: null },
+        expiresAt: { type: Date,   default: null },
     },
-    isActive: {
-        type: Boolean,
-        default: true,
-    }
-},
-    {
-        timestamps: true,
-    });
+}, { timestamps: true });
 
-userSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next();
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+userSchema.pre('validate', function () {
+    if (!this.email && !this.mobile) {
+        this.invalidate('email', 'At least one of email or mobile is required');
+    }
+});
+
+userSchema.pre('save', async function () {
+    if (!this.isModified('password')) return;
+    this.password = await bcrypt.hash(this.password, 10);
 });
 
 userSchema.methods.comparePassword = async function (userPassword) {
-
-    return await bcrypt.compare(userPassword, this.password);
-}
+    return bcrypt.compare(userPassword, this.password);
+};
 
 export default mongoose.model('User', userSchema);
