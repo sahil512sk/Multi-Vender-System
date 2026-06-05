@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
+import OtpPage from './pages/OtpPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
@@ -15,6 +16,7 @@ const App = () => (
                     <Route path="/"         element={<Navigate to="/dashboard" replace />} />
                     <Route path="/login"    element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/otp"      element={<OtpPage />} />
                     <Route path="/dashboard" element={
                         <ProtectedRoute>
                             <DashboardPage />

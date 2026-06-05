@@ -31,7 +31,7 @@ const LoginPage = () => {
         setLoading(true);
         try {
             await login(payload);
-            navigate('/dashboard');
+            navigate('/otp', { state: { email: form.email, mobile: form.mobile, flow: 'dashboard' } });
         } catch (err) {
             setError(err.message);
         } finally {
