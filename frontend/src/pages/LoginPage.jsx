@@ -19,19 +19,28 @@ const LoginPage = () => {
         e.preventDefault();
         setError('');
 
-        if (!isEmail(identifier) && !isMobile(identifier)) {
+        const usingEmail = isEmail(identifier);
+        const usingMobile = isMobile(identifier);
+
+        if (!usingEmail && !usingMobile) {
             return setError('Enter a valid email or 10-digit mobile number');
         }
         if (!password) return setError('Password is required');
 
         const payload = { password };
-        if (isEmail(identifier))  payload.email  = identifier;
-        else                      payload.mobile = identifier;
+        if (usingEmail) payload.email = identifier;
+        else payload.mobile = identifier;
 
         setLoading(true);
         try {
             await login(payload);
-            navigate('/otp', { state: { email: form.email, mobile: form.mobile, flow: 'dashboard' } });
+            navigate('/otp', {
+                state: {
+                    email: usingEmail ? identifier : '',
+                    mobile: usingMobile ? identifier : '',
+                    flow: 'login',
+                },
+            });
         } catch (err) {
             setError(err.message);
         } finally {

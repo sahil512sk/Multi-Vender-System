@@ -43,7 +43,7 @@ const RegisterPage = () => {
         setLoading(true);
         try {
             await register(payload);
-            navigate('/otp', { state: { email: form.email, mobile: form.mobile, flow: 'dashboard' } });
+            navigate('/otp', { state: { email: form.email, mobile: form.mobile, flow: 'register' } });
         } catch (err) {
             setApiErr(err.message);
         } finally {

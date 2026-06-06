@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 /* ── tiny helper: call your existing axios instance or swap in fetch ── */
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -22,6 +23,7 @@ const OTP_TTL = 5 * 60;
 export default function OtpPage() {
   const navigate  = useNavigate();
   const location  = useLocation();
+  const { setUser } = useAuth();
 
   /* router state set by LoginPage / RegisterPage */
   const { email, mobile, flow = "login" } =
@@ -103,17 +105,18 @@ export default function OtpPage() {
 
         /* store token */
         if (data.token) localStorage.setItem("token", data.token);
+        if (data.user) setUser(data.user);
 
         setStatus("success");
         setMessage(data.message || "Verified!");
 
-        setTimeout(() => navigate("/dashboard"), 900);
+        setTimeout(() => navigate("/dashboard", { replace: true }), 900);
       } catch (err) {
         setStatus("error");
         setMessage(err.message);
       }
     },
-    [digits, email, mobile, navigate]
+    [digits, email, mobile, navigate, setUser]
   );
 
   /* auto-submit when all filled */
