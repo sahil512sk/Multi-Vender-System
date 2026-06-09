@@ -48,14 +48,14 @@ export const sendEmailOtp = async (email, otp) => {
         to:      email,
         subject: 'Your OTP Code',
 
-        text: `Your OTP is: ${otp}. Valid for 5 minutes. Do not share it with anyone.`,
+        text: `Your OTP is: ${otp}. Valid for 1 minute. Do not share it with anyone.`,
         html: `
             <div style="font-family:Arial,sans-serif;max-width:420px;margin:auto;
                         padding:28px;border:1px solid #e5e7eb;border-radius:10px;">
                 <h2 style="margin:0 0 8px;color:#111827;">Verification Code</h2>
                 <p style="color:#6b7280;margin:0 0 20px;">
                     Use the code below to verify your account.
-                    It expires in <strong>5 minutes</strong>.
+                    It expires in <strong>1 minute</strong>.
                 </p>
                 <div style="font-size:36px;font-weight:700;letter-spacing:10px;
                             color:#4f46e5;padding:16px 0;">
@@ -78,7 +78,7 @@ export const sendSmsOtp = async (mobile, otp) => {
     if (!from) throw new Error('TWILIO_PHONE not set in .env');
 
     await getTwilio().messages.create({
-        body: `Your OTP is: ${otp}. Valid for 5 minutes. Do not share this with anyone.`,
+        body: `Your OTP is: ${otp}. Valid for 1 minute. Do not share this with anyone.`,
         from,
         to,
     });

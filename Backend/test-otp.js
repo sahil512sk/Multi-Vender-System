@@ -23,7 +23,7 @@ async function testGmail() {
             to:      TEST_EMAIL,
             subject: 'OTP Test',
             text:    `Your OTP is: ${otp}`,
-            html:    `<h2>Your OTP is: <strong>${otp}</strong></h2><p>Valid for 5 minutes.</p>`
+            html:    `<h2>Your OTP is: <strong>${otp}</strong></h2><p>Valid for 1 minute.</p>`
         });
         console.log(`  ✅ Email sent | OTP: ${otp}`);
     } catch (err) {
