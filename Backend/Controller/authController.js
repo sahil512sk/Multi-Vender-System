@@ -42,8 +42,33 @@ export const register = async (req, res) => {
 
         setTimeout(() => pending.delete(key), 10 * 60 * 1000);
 
-        if (email)  await sendEmailOtp(email,  otp).catch(e => console.error('❌ Email failed:', e.message));
-        if (mobile) await sendSmsOtp(mobile, otp).catch(e => console.error('❌ SMS failed:',   e.message));
+        let sendSuccess = false;
+        let sendError = null;
+
+        if (email) {
+            try {
+                await sendEmailOtp(email, otp);
+                sendSuccess = true;
+            } catch (e) {
+                console.error('❌ Email failed:', e.message);
+                sendError = e.message;
+            }
+        }
+
+        if (mobile && !sendError) {
+            try {
+                await sendSmsOtp(mobile, otp);
+                sendSuccess = true;
+            } catch (e) {
+                console.error('❌ SMS failed:', e.message);
+                sendError = e.message;
+            }
+        }
+
+        if (!sendSuccess) {
+            pending.delete(key);
+            return res.status(500).json({ message: `Failed to send OTP: ${sendError}` });
+        }
 
         return res.status(200).json({
             message: 'OTP sent. Please verify to complete registration.',
@@ -77,9 +102,30 @@ export const login = async (req, res) => {
         user.otp = { code: otp, expiresAt };
         await user.save();
 
-        if (email  && user.email)  await sendEmailOtp(user.email,  otp).catch(e => console.error('❌ Email failed:', e.message));
-        if (mobile && user.mobile) await sendSmsOtp(user.mobile, otp).catch(e => console.error('❌ SMS failed:',   e.message));
+        let sendSuccess = false;
+        let sendError = null;
 
+        if (email) {
+            try {
+                await sendEmailOtp(email, otp);
+                sendSuccess = true;
+            } catch (e) {
+                console.error('❌ Email failed:', e.message);
+                sendError = e.message;
+            }
+        } else if (mobile) {
+            try {
+                await sendSmsOtp(mobile, otp);
+                sendSuccess = true;
+            } catch (e) {
+                console.error('❌ SMS failed:', e.message);
+                sendError = e.message;
+            }
+        }
+
+        if (!sendSuccess) {
+            return res.status(500).json({ message: `Failed to send OTP: ${sendError}` });
+        }
 
         return res.status(200).json({
             message: 'Password verified. OTP sent to your email/mobile.',
@@ -194,8 +240,32 @@ export const resendOtp = async (req, res) => {
             await user.save();
         }
 
-        if (email)  await sendEmailOtp(email,  otp).catch(e => console.error('❌ Email failed:', e.message));
-        if (mobile) await sendSmsOtp(mobile, otp).catch(e => console.error('❌ SMS failed:',   e.message));
+        let sendSuccess = false;
+        let sendError = null;
+
+        if (email) {
+            try {
+                await sendEmailOtp(email, otp);
+                sendSuccess = true;
+            } catch (e) {
+                console.error('❌ Email failed:', e.message);
+                sendError = e.message;
+            }
+        }
+
+        if (mobile && !sendError) {
+            try {
+                await sendSmsOtp(mobile, otp);
+                sendSuccess = true;
+            } catch (e) {
+                console.error('❌ SMS failed:', e.message);
+                sendError = e.message;
+            }
+        }
+
+        if (!sendSuccess) {
+            return res.status(500).json({ message: `Failed to resend OTP: ${sendError}` });
+        }
 
         return res.status(200).json({ message: 'OTP resent successfully' });
 

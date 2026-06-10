@@ -61,3 +61,36 @@ export const createProduct = async (req, res) => {
     });
   }
 };
+
+export const fetchProducts = async (req, res) => {
+  try {
+    const { category_id, sub_category_id, search } = req.query;
+    let query = {};
+
+    if (category_id) {
+      query.category_id = category_id;
+    }
+
+    if (sub_category_id) {
+      query.sub_category_id = sub_category_id;
+    }
+
+    if (search) {
+      query.name = { $regex: search, $options: 'i' };
+    }
+
+    const products = await Product.find(query)
+      .populate('category_id')
+      .populate('sub_category_id');
+
+    res.status(200).json({
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

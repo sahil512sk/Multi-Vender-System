@@ -30,3 +30,25 @@ export const createSubCategory = async (req, res) => {
     });
   }
 };
+
+export const fetchSubCategories = async (req, res) => {
+  try {
+    const { category_id } = req.query;
+    let query = {};
+
+    if (category_id) {
+      query.category_id = category_id;
+    }
+
+    const subCategories = await SubCategory.find(query).populate('category_id');
+    res.status(200).json({
+      success: true,
+      data: subCategories,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
