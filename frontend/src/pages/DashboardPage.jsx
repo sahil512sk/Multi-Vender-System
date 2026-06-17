@@ -2,10 +2,11 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { productApi } from '../api/products';
+import { useUploadThing } from '../api/uploadthing';
 import '../styles/dashboard.css';
 
 const roleColor = { buyer: '#2563eb', vendor: '#7c3aed', admin: '#dc2626' };
-const roleIcon  = { buyer: '🛒', vendor: '🏪', admin: '🛡' };
+const roleIcon = { buyer: '🛒', vendor: '🏪', admin: '🛡' };
 
 const DashboardPage = () => {
     const { user, logout } = useAuth();
@@ -33,22 +34,49 @@ const DashboardPage = () => {
         images: [],
     });
     const [previews, setPreviews] = useState([]);
+    const [uploading, setUploading] = useState(false);
+
+    const { startUpload } = useUploadThing('productImages', {
+        onClientUploadComplete: (res) => {
+            const urls = res.map(f => f.url);
+            setFormData(prev => ({ ...prev, images: urls }));
+            setUploading(false);
+        },
+        onUploadError: (err) => {
+            alert('Image upload failed: ' + err.message);
+            setUploading(false);
+        },
+    });
 
     const canAddProducts = ['vendor', 'admin'].includes(user?.role);
     const canAddCategories = user?.role === 'admin';
 
     const resetProductForm = () => {
+        previews.forEach(url => URL.revokeObjectURL(url)); // cleanup blobs
         setFormData({ name: '', price: '', description: '', discount: '', images: [] });
         setPreviews([]);
     };
 
-    const handleImageChange = (e) => {
-        const files = Array.from(e.target.files);
+    const openModal = (setter) => {
+        setShowCategoryModal(false);
+        setShowSubCategoryModal(false);
+        setShowProductModal(false);
+        previews.forEach(url => URL.revokeObjectURL(url));
+        setFormData({ name: '', price: '', description: '', discount: '', images: [] });
+        setPreviews([]);
+        setter(true);
+    };      
 
-        setFormData({ ...formData, images: files });
-        // Generate previews
-        const urls = files.map(file => URL.createObjectURL(file));
-        setPreviews(urls);
+    const handleImageChange = async (e) => {
+        const files = Array.from(e.target.files);
+        if (!files.length) return;
+
+        const localPreviews = files.map(file => URL.createObjectURL(file));
+        setPreviews(localPreviews);
+        setFormData(prev => ({ ...prev, images: [] }));
+
+        setUploading(true);
+        await startUpload(files);
     };
 
     // Fetch categories
@@ -167,7 +195,12 @@ const DashboardPage = () => {
             payload.append('sub_category_id', selectedSubCategory);
             payload.append('discount', formData.discount || '0');
 
-            formData.images.forEach((file) => payload.append('images', file));
+            // Guard: images must be uploaded before submitting
+            if (formData.images.length === 0) {
+                alert('Please wait for images to finish uploading');
+                return;
+            }
+            formData.images.forEach((url) => payload.append('images', url));
 
             await productApi.createProduct(payload);
             resetProductForm();
@@ -437,7 +470,9 @@ const DashboardPage = () => {
                             />
                             {!selectedSubCategory && <p className="warning">⚠️ Please select a subcategory first</p>}
                             <div className="modal-actions">
-                                <button type="submit" className="btn-primary">Add</button>
+                                <button type="submit" className="btn-primary" disabled={uploading}>
+                                    {uploading ? 'Uploading images…' : 'Add'}
+                                </button>
                                 <button type="button" className="btn-outline" onClick={() => { setShowProductModal(false); resetProductForm(); }}>Cancel</button>
                             </div>
                         </form>
