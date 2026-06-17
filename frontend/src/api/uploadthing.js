@@ -1,17 +1,8 @@
-import { createUploadthing } from 'uploadthing/express';
+import { generateUploadButton, generateUploadDropzone, generateReactHelpers  } from '@uploadthing/react';
 
-const f = createUploadthing();
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-export const uploadRouter = {
-    productImages: f({ image: { maxFileSize: '4MB', maxFileCount: 10 } })
-        .middleware(async ({ req }) => {
-            const user = req.user;
-            if (!user) throw new Error('Unauthorized');
-            return { userId: user._id };
-        })
-        .onUploadComplete(async ({ metadata, file }) => {
-            console.log('Uploaded by userId:', metadata.userId);
-            console.log('File URL:', file.ufsUrl);
-            return { url: file.ufsUrl };
-        }),
-};
+export const UPLOAD_URL = `${BACKEND_URL}/api/uploadthing`;
+export const UploadButton = generateUploadButton({ url: UPLOAD_URL });
+export const UploadDropzone = generateUploadDropzone({ url: UPLOAD_URL });
+export const { useUploadThing } = generateReactHelpers({ url: UPLOAD_URL });

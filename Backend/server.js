@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 import authRoute from './Route/authRoute.js';
 import productRoute from './Route/productRoute.js';
 import { createRouteHandler } from 'uploadthing/express';
-import { uploadRouter } from './uploadthing.js';
+import { uploadRouter } from './utils/uploadthing.js';
 
 const app = express();
 const PORT = process.env.port || 5000;

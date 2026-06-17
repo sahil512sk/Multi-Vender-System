@@ -2,7 +2,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { productApi } from '../api/products';
-import { useUploadThing } from '../api/uploadthing';
+import { useUploadThing, UPLOAD_URL } from '../api/uploadthing';
 import '../styles/dashboard.css';
 
 const roleColor = { buyer: '#2563eb', vendor: '#7c3aed', admin: '#dc2626' };
@@ -37,6 +37,7 @@ const DashboardPage = () => {
     const [uploading, setUploading] = useState(false);
 
     const { startUpload } = useUploadThing('productImages', {
+        url: UPLOAD_URL,
         onClientUploadComplete: (res) => {
             const urls = res.map(f => f.url);
             setFormData(prev => ({ ...prev, images: urls }));
@@ -291,7 +292,7 @@ const DashboardPage = () => {
                     <div className="sidebar-header">
                         <h3>📂 Categories</h3>
                         {canAddCategories && (
-                            <button className="btn-small" onClick={() => setShowCategoryModal(true)}>+ Add</button>
+                            <button className="btn-small" onClick={() => openModal(setShowCategoryModal)}>+ Add</button>
                         )}
                     </div>
                     <div className="categories-list">
@@ -313,7 +314,7 @@ const DashboardPage = () => {
                                                 onClick={() => handleCategoryToggle(cat._id)}
                                             >
                                                 {expandedCategories[cat._id] ? '▼' : '▶'} Subcategories
-                                                {canAddProducts && <span className="add-badge" onClick={(e) => { e.stopPropagation(); setShowSubCategoryModal(true); }}>+</span>}
+                                                {canAddProducts && <span className="add-badge" onClick={(e) => { e.stopPropagation(); openModal(setShowSubCategoryModal); }}>+</span>}
                                             </button>
                                             {expandedCategories[cat._id] && (subCategories[cat._id] || []).map(subCat => (
                                                 <button
@@ -343,7 +344,7 @@ const DashboardPage = () => {
                             />
                         </div>
                         {canAddProducts && (
-                            <button className="btn-primary" onClick={() => setShowProductModal(true)}>
+                            <button className="btn-primary" onClick={() => openModal(setShowProductModal)}>
                                 ➕ Add Product
                             </button>
                         )}
