@@ -3,11 +3,15 @@ const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export const request = async (endpoint, options = {}) => {
     const token = getToken();
-    const headers = { 'Content-Type': 'application/json', ...options.headers };
+    const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+    const headers = isFormData ? { ...options.headers } : { 'Content-Type': 'application/json', ...options.headers };
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
     const res = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
-    const data = await res.json();
+    const contentType = res.headers.get('content-type') || '';
+    const data = contentType.includes('application/json')
+        ? await res.json()
+        : { message: await res.text() };
 
     if (!res.ok) throw new Error(data.message || 'Something went wrong');
     return data;
@@ -19,7 +23,7 @@ export const setToken    = (token) => localStorage.setItem('token', token);
 export const removeToken = ()      => localStorage.removeItem('token');
 export const isLoggedIn  = ()      => !!getToken();
 
-// ─── Storage ────────────────────────────────────────────
+// Storage
 export const getItem    = (key)        => JSON.parse(localStorage.getItem(key));
 export const setItem    = (key, value) => localStorage.setItem(key, JSON.stringify(value));
 export const removeItem = (key)        => localStorage.removeItem(key);

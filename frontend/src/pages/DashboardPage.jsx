@@ -25,10 +25,31 @@ const DashboardPage = () => {
     const [showCategoryModal, setShowCategoryModal] = useState(false);
     const [showSubCategoryModal, setShowSubCategoryModal] = useState(false);
     const [showProductModal, setShowProductModal] = useState(false);
-    const [formData, setFormData] = useState({ name: '', price: '', attributes: {} });
+    const [formData, setFormData] = useState({
+        name: '',
+        price: '',
+        description: '',
+        discount: '',
+        images: [],
+    });
+    const [previews, setPreviews] = useState([]);
 
     const canAddProducts = ['vendor', 'admin'].includes(user?.role);
     const canAddCategories = user?.role === 'admin';
+
+    const resetProductForm = () => {
+        setFormData({ name: '', price: '', description: '', discount: '', images: [] });
+        setPreviews([]);
+    };
+
+    const handleImageChange = (e) => {
+        const files = Array.from(e.target.files);
+
+        setFormData({ ...formData, images: files });
+        // Generate previews
+        const urls = files.map(file => URL.createObjectURL(file));
+        setPreviews(urls);
+    };
 
     // Fetch categories
     const loadCategories = async () => {
@@ -107,7 +128,7 @@ const DashboardPage = () => {
         if (!formData.name.trim()) return;
         try {
             await productApi.createCategory({ name: formData.name });
-            setFormData({ name: '', price: '', attributes: {} });
+            setFormData({ name: '', price: '', description: '', discount: '', images: [] });
             setShowCategoryModal(false);
             loadCategories();
         } catch (err) {
@@ -123,7 +144,7 @@ const DashboardPage = () => {
                 name: formData.name,
                 category_id: selectedCategory
             });
-            setFormData({ name: '', price: '', attributes: {} });
+            setFormData({ name: '', price: '', description: '', discount: '', images: [] });
             setShowSubCategoryModal(false);
             loadSubCategories(selectedCategory);
         } catch (err) {
@@ -138,14 +159,18 @@ const DashboardPage = () => {
             return;
         }
         try {
-            await productApi.createProduct({
-                name: formData.name,
-                price: parseFloat(formData.price),
-                category_id: selectedCategory,
-                sub_category_id: selectedSubCategory,
-                attributes: formData.attributes
-            });
-            setFormData({ name: '', price: '', attributes: {} });
+            const payload = new FormData();
+            payload.append('name', formData.name);
+            payload.append('price', String(formData.price));
+            payload.append('description', formData.description || '');
+            payload.append('category_id', selectedCategory);
+            payload.append('sub_category_id', selectedSubCategory);
+            payload.append('discount', formData.discount || '0');
+
+            formData.images.forEach((file) => payload.append('images', file));
+
+            await productApi.createProduct(payload);
+            resetProductForm();
             setShowProductModal(false);
             loadProducts({ categoryId: selectedCategory, subCategoryId: selectedSubCategory });
         } catch (err) {
@@ -374,15 +399,46 @@ const DashboardPage = () => {
                             <input
                                 type="number"
                                 placeholder="Price"
-                                step="0.01"
+                                step="1"
                                 value={formData.price}
                                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                                 required
                             />
+                            <input
+                                type="text"
+                                placeholder="Description"
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                required
+                            />
+                            <div>
+                                <label>Images</label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={handleImageChange}
+                                    required
+                                />
+
+                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                                    {previews.map((src, i) => (
+                                        <img key={i} src={src} alt={`preview-${i}`} width={80} height={80}
+                                            style={{ objectFit: 'cover', borderRadius: '4px' }} />
+                                    ))}
+                                </div>
+                            </div>
+                            <input
+                                type="number"
+                                placeholder="Discount"
+                                step="0.1"
+                                value={formData.discount}
+                                onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
+                            />
                             {!selectedSubCategory && <p className="warning">⚠️ Please select a subcategory first</p>}
                             <div className="modal-actions">
                                 <button type="submit" className="btn-primary">Add</button>
-                                <button type="button" className="btn-outline" onClick={() => setShowProductModal(false)}>Cancel</button>
+                                <button type="button" className="btn-outline" onClick={() => { setShowProductModal(false); resetProductForm(); }}>Cancel</button>
                             </div>
                         </form>
                     </div>

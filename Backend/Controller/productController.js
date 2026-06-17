@@ -6,9 +6,11 @@ export const createProduct = async (req, res) => {
   try {
     const {
       name,
+      description,
       category_id,
       sub_category_id,
       price,
+      images,
       attributes,
     } = req.body;
 
@@ -42,12 +44,23 @@ export const createProduct = async (req, res) => {
       });
     }
 
+    if (!description) {
+      return res.status(400).json({
+        success: false,
+        message: 'Description is required',
+      });
+    }
+
+    const imagePaths = req.files ? req.files.map((file) => `/uploads/${file.filename}`) : [];
+
     const product = await Product.create({
       name,
       category_id,
       sub_category_id,
       price,
+      description,
       attributes,
+      images: imagePaths,
     });
 
     return res.status(201).json({

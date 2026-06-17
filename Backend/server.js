@@ -5,6 +5,8 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import authRoute from './Route/authRoute.js';
 import productRoute from './Route/productRoute.js';
+import { createRouteHandler } from 'uploadthing/express';
+import { uploadRouter } from './uploadthing.js';
 
 const app = express();
 const PORT = process.env.port || 5000;
@@ -14,6 +16,10 @@ app.use(express.json());
 
 app.use('/api/auth', authRoute);
 app.use('/api/products', productRoute);
+app.use('/api/uploadthing', createRouteHandler({
+    router: uploadRouter,
+    config: { token: process.env.UPLOADTHING_TOKEN },
+}));
 
 app.get('/', (req, res) => res.send('kida fer'));
 const start = async () => {
