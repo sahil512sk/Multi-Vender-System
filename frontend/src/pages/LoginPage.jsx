@@ -62,7 +62,7 @@ const LoginPage = () => {
                         <input
                             id="identifier"
                             type="text"
-                            placeholder="you@email.com or 9876543210"
+                            placeholder="you@email.com or 987...."
                             value={identifier}
                             onChange={e => setIdentifier(e.target.value)}
                             autoComplete="username"
